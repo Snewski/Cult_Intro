@@ -3,6 +3,7 @@
 # any python packages you want to have preinstalled
 pip install pingouin
 pip install lxml
+pip install nltk
 
 # your git config information
 git config --global user.email "202206511@post.au.dk"
