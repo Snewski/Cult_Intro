@@ -2,7 +2,7 @@
 title: "Assignment 2"
 author: "P.H.W"
 date: "2024-10-30"
-output: html_document
+output: rmarkdown::github_document
 ---
 
 ```{r setup, include=FALSE}
