@@ -2,18 +2,19 @@
 title: "Assignment 2"
 author: "P.H.W"
 date: "2024-10-30"
-output: html_document: keep_md: true
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-install.packages('car')
-install.packages("ggpubr")
+
 library(ggpubr)
 library(dslabs)
 library(car)
-
+library(dplyr)
 
 ```
 
@@ -52,7 +53,10 @@ Filter for the year 1978 and remove rows with missing values (the function na.ex
 ```{r}
 data(GSSvocab)
 
+
 filtered <- GSSvocab %>% filter(year==1978) %>% na.exclude()
+
+
 
 ```
 
