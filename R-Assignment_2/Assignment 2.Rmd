@@ -1,0 +1,135 @@
+---
+title: "Assignment 2"
+author: "P.H.W"
+date: "2024-10-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+install.packages('car')
+install.packages("ggpubr")
+library(ggpubr)
+library(dslabs)
+library(car)
+
+
+```
+
+## R Markdown
+
+Part 1
+
+Load  the 'divorce_margarine'dataset  from  the 'dslabs'package.  Investigate  the  correlation between  margarine  consumption  and  divorce rates  in  Maine.  Would  an  increase  in  the preference for margarine lead to skyrocketing divorce rates
+
+
+```{r}
+
+data(divorce_margarine)
+
+divorce_margarine %>%
+  ggplot(aes(x = margarine_consumption_per_capita, y = divorce_rate_maine)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm') +
+  labs(x = "Margarine Consumption", y = "Divorce Rate") +
+  theme_minimal() +
+  stat_cor(method = "pearson", label.x = Inf, label.y = Inf, hjust = 1, vjust = 1)+
+  ggtitle("Margarine Consumption vs. Divorce Rates in Maine")
+
+# We see a high positive correlation between margarine consumption and divorce rates in Maine: R = 0.99, p = 1.3e-08
+
+
+```
+
+
+Part 2
+
+Load the ‘GSSvocab’dataset from the ‘car’package. 
+This dataset contains people’s scores on an Englishvocabulary test and includes demographic information.
+Filter for the year 1978 and remove rows with missing values (the function na.exclude()is one way to do this–check out the documentation!).
+
+```{r}
+data(GSSvocab)
+
+filtered <- GSSvocab %>% filter(year==1978) %>% na.exclude()
+
+```
+
+Is a person’s score on the vocabulary test (‘vocab’) significantly impacted by their level  of education (‘educ’)? 
+Visualize the relationship in a plot and build a model. Briefly explain theresults.
+
+```{r}
+
+filtered %>% ggplot(aes(educ,vocab)) + 
+  geom_point(position = 'jitter') +
+  scale_y_continuous(breaks = seq(0, max(filtered$vocab, na.rm = TRUE), by = 1)) +
+  scale_x_continuous(breaks = seq(0, max(filtered$educ, na.rm = TRUE), by = 2))+
+  labs(x = "Level of Education", y = "Vocabulary Score") +
+  theme_minimal()+
+  ggtitle("Vocabulary Score vs. Education Level")
+
+m1 <- lm(vocab~educ, filtered)
+summary(m1)
+# We see from the model summary that education level significantly impacts the vocabulary test score,  
+# and that, on average, each additional year/level of education is associated with an increase of 0.39 points in the vocabulary score.
+
+```
+
+Whether a person is the native of an English-speaking country(‘nativeBorn’) could potentially have an impact on the size of their vocabulary. Visualize the relationship and add the predictor to the model. Briefly explain the results.
+
+```{r}
+
+filtered %>% ggplot(aes(x = nativeBorn, y = vocab)) +
+  geom_boxplot() +
+  scale_y_continuous(breaks = seq(0, max(filtered$vocab, na.rm = TRUE), by = 1))+
+  labs(x = "Native Born", y = "Vocabulary Score") +
+  theme_minimal()+
+  ggtitle("Vocabulary Score by Nativeness")
+
+m2 <- lm(vocab~educ + nativeBorn, filtered)
+summary(m2)
+
+# From the model summary we see that the education coefficient remains consistent with the previous model,
+# and that, on average, being a native-born in an English-speaking country is associated with an increase of 0.65 points in vocabulary score.
+
+```
+
+
+Does  a  person’s  level  of  education  depend  on  whether they  are  a  native  of  the  country? Visualize the relationship. Do you think it makes sense to add the relationship as an interaction-term? Try creating the model and briefly explain the results.
+
+```{r}
+
+ggplot(data = filtered, aes(x = as.factor(nativeBorn), y = educ)) +
+  geom_boxplot() +
+  labs(x = "Native Born", y = "Education Level") +
+  scale_y_continuous(breaks = seq(0, max(filtered$educ, na.rm = TRUE), by = 2))+
+  theme_minimal() +
+  ggtitle("Education Level by Nativeness")
+
+m3 <- lm(vocab~educ*nativeBorn, filtered)
+summary(m3)
+
+# We see that the interaction term is not significant, which suggests that the impact of education on vocabulary does not depend on nativeness.
+# We can also see that education level is the only good predictor of vocabulary score in this model. 
+
+```
+
+
+
+
+Which model performs best?
+
+```{r}
+anova(m1,m2,m3)
+AIC(m1,m2,m3)
+BIC(m1,m2,m3)
+# In the ANOVA We see that adding nativeBorn to the model significantly improves the fit, 
+# and adding the interaction term (educ:nativeBorn) does not significantly improve the model fit.
+
+# Besides significantly improving the fit, Model 2: vocab ~ educ + nativeBorn, also has the lowest AIC and BIC scores.
+
+
+```
+
+
